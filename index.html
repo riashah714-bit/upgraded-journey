@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Be My Valentine? 💘</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="card">
+    <div class="badge">Valentine’s Question</div>
+    <h1>Will you be my Valentine? 💖</h1>
+    <p class="sub">Choose wisely. (Your cursor is being watched.)</p>
+
+    <div id="btnArea" class="btn-area">
+      <button id="yesBtn" class="btn yes" type="button">YES 💘</button>
+      <button id="noBtn" class="btn no" type="button">no</button>
+    </div>
+
+    <p id="message" class="message" aria-live="polite"></p>
+  </main>
+
+  <script>
+    const area = document.getElementById("btnArea");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
+    const msg    = document.getElementById("message");
+
+    let yesScale = 1;
+    let dodges = 0;
+
+    // Random position inside the button area, keeping the button fully visible
+    function moveNoButton() {
+      const areaRect = area.getBoundingClientRect();
+      const btnRect  = noBtn.getBoundingClientRect();
+
+      const maxX = areaRect.width  - btnRect.width;
+      const maxY = areaRect.height - btnRect.height;
+
+      // pick a new position
+      const x = Math.max(0, Math.random() * maxX);
+      const y = Math.max(0, Math.random() * maxY);
+
+      noBtn.style.left = `${x}px`;
+      noBtn.style.top  = `${y}px`;
+    }
+
+    function growYesButton() {
+      yesScale = Math.min(1.9, yesScale + 0.08); // cap so it doesn't explode
+      yesBtn.style.transform = `scale(${yesScale})`;
+    }
+
+    // Make NO dodge when cursor approaches
+    noBtn.addEventListener("mouseenter", () => {
+      dodges++;
+      moveNoButton();
+      growYesButton();
+
+      // optional escalating text
+      const lines = [
+        "nice try 😭",
+        "you really thought…",
+        "not happening 😌",
+        "just click yes babe",
+        "be serious 💀",
+        "okay now you HAVE to click yes"
+      ];
+      msg.textContent = lines[Math.min(lines.length - 1, Math.floor(dodges / 2))];
+    });
+
+    // Also dodge on touch devices (tap)
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      dodges++;
+      moveNoButton();
+      growYesButton();
+      msg.textContent = "nope 😌";
+    }, { passive: false });
+
+    // YES button behavior
+    yesBtn.addEventListener("click", () => {
+      msg.textContent = "YAYYYYY 💞💞💞 I LOVE YOU!!! Happy Valentine’s Day 🥹";
+      area.classList.add("celebrate");
+      noBtn.disabled = true;
+      yesBtn.disabled = true;
+
+      // little confetti-ish effect via emojis
+      for (let i = 0; i < 18; i++) {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        heart.textContent = ["💖","💘","💕","💝","💗"][Math.floor(Math.random()*5)];
+        heart.style.left = Math.random() * 100 + "%";
+        heart.style.animationDuration = (1.6 + Math.random() * 1.6) + "s";
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 3500);
+      }
+    });
+
+    // Initial placement so NO isn't sitting in a default spot
+    window.addEventListener("load", () => moveNoButton());
+    window.addEventListener("resize", () => moveNoButton());
+  </script>
+</body>
+</html>
